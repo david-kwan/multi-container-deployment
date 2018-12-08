@@ -1,0 +1,23 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t davidkwan/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run davidkwan/react-test npm test -- --coverage # npm run test is watch mode, never exits. coverage forces an exit
+
+after_success:
+  - docker build -t davidkwan/multi-container-deployment-client ./client
+  - docker build -t davidkwan/multi-container-deployment-nginx ./nginx
+  - docker build -t davidkwan/multi-container-deployment-server ./server
+  - docker build -t davidkwan/multi-container-deployment-worker ./worker
+  # log into docker hub
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # push production images to docker hub
+  - docker push davidkwan/multi-container-deployment-client
+  - docker push davidkwan/multi-container-deployment-nginx
+  - docker push davidkwan/multi-container-deployment-server
+  - docker push davidkwan/multi-container-deployment-worker
+
