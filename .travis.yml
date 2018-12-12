@@ -15,8 +15,20 @@ after_success:
   - docker build -t davidkwan/multi-container-deployment-worker ./worker
 
 deploy:
-  provider: script
-  script: bash ./scripts/docker_push.sh
-  on:
-    branch: master
+  - provider: script
+    script: bash ./scripts/docker_push.sh
+    on:
+      branch: master
+  - provider: elasticbeanstalk
+    region: us-east-1
+    app: multi-container-deployment
+    env: MultiContainerDeployment-env
+    bucket_name: elasticbeanstalk-us-east-1-067028029760
+    bucket_path: multi-container-deployment
+    on:
+      branch: master
+    access_key_id: $AWS_ACCESS_KEY
+    secret_access_key:
+      secure: $AWS_SECRET_KEY
+  
 
